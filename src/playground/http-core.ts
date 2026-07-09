@@ -8,12 +8,6 @@ import http from 'http';
 import type { IncomingMessage, ServerResponse } from 'http';
 
 const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
-  // req is an IncomingMessage — a readable stream + request metadata
-  // res is a ServerResponse — a writable stream you send back to the client
-
-  console.log(`${req.method} ${req.url}`);
-
-  // Manual routing — this is literally what Express Router does under the hood
   if (req.method === 'GET' && req.url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok' }));
