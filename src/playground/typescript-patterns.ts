@@ -1,6 +1,6 @@
 // src/playground/typescript-patterns.ts
 //
-// These are the 5 patterns you'll use repeatedly in Pulse.
+// These are the 5 patterns you'll use repeatedly in Chat Backend.
 // Read each one, understand it, then delete this file.
 
 import { Request, Response } from 'express';
