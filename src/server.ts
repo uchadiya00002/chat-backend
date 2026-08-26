@@ -10,6 +10,6 @@ import app from './app';
 const PORT = env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`Pulse API running on http://localhost:${PORT}`);
+  console.log(`Chat Backend running on http://localhost:${PORT}`);
   console.log(`Environment: ${env.NODE_ENV}`)
 });
