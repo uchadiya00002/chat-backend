@@ -2,14 +2,16 @@
 // Keeping this separate from app.ts means tests never accidentally
 // bind a port — they import app directly.
 
-import 'dotenv/config'; // MUST be first line — loads .env before any other import
+import 'dotenv/config';
+import http from 'http';
 import { env } from './config/env';
 import app from './app';
+import { initSocket } from './socket';
 
+const httpServer = http.createServer(app);
+initSocket(httpServer);
 
-const PORT = env.PORT;
-
-app.listen(PORT, () => {
-  console.log(`Chat Backend running on http://localhost:${PORT}`);
-  console.log(`Environment: ${env.NODE_ENV}`)
+httpServer.listen(env.PORT, () => {
+  console.log(`Chat Backend running on http://localhost:${env.PORT}`);
+  console.log(`Environment: ${env.NODE_ENV}`);
 });
