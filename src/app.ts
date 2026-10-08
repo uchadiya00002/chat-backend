@@ -5,18 +5,23 @@
 // a real port — which is how Week 3 testing works.
 
 import express, { Application } from "express";
+import cors from "cors";
 import { env } from "./config/env";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
+import authRouter from "./routes/auth.routes";
+import workspacesRouter from "./routes/workspaces.routes";
 
 const app: Application = express();
 
 // --- Core middleware (runs on every request, in this order) ---
+app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true })); // allow the frontend's origin
 app.use(express.json()); // parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // parse form bodies
 
 // --- Routes ---
-// You'll add real routes here from Day 5 onwards as you build them.
-// For now, just a health check to confirm the server boots.
+app.use("/auth", authRouter);
+app.use("/workspaces", workspacesRouter);
+
 app.get("/health", (req, res) => {
   res
     .status(200)
