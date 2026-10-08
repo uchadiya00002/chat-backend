@@ -1,0 +1,44 @@
+name: CI Build & Migrate
+
+on:
+  push:
+    branches: [ main, deployment ]
+  pull_request:
+    # run workflow for PRs targeting main only
+    branches: [ main ]
+
+jobs:
+  build-and-migrate:
+    name: Build + Migrate (Node 22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies (npm)
+        run: npm install
+
+      - name: Ensure pnpm is available (fallback)
+        run: |
+          # Some runners or actions may still attempt to call `pnpm`.
+          # Install as a fallback so the job doesn't fail with "pnpm not found".
+          if ! command -v pnpm >/dev/null 2>&1; then
+            npm install -g pnpm@latest || true
+          fi
+          pnpm -v || true
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Prisma migrations
+        # Only run migrations on an actual push to the main branch (not on PR checks)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
