@@ -25,6 +25,15 @@ jobs:
       - name: Install dependencies (npm)
         run: npm install
 
+      - name: Ensure pnpm is available (fallback)
+        run: |
+          # Some runners or actions may still attempt to call `pnpm`.
+          # Install as a fallback so the job doesn't fail with "pnpm not found".
+          if ! command -v pnpm >/dev/null 2>&1; then
+            npm install -g pnpm@latest || true
+          fi
+          pnpm -v || true
+
       - name: Build
         run: npm run build
 
