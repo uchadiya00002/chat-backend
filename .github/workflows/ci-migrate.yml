@@ -20,21 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Enable Corepack and activate pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm@latest
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies (npm)
+        run: npm install
 
       - name: Build
-        run: pnpm build
+        run: npm run build
 
       - name: Run Prisma migrations
         # Only run migrations on an actual push to the main branch (not on PR checks)
