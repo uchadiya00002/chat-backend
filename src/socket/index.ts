@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { pubClient, subClient } from '../lib/redis';
 import { authenticateSocket } from './authenticateSocket';
 import prisma from '../config/prima';
+import { env } from '../config/env';
 import { z } from 'zod';
 
 const messageSchema = z.object({
@@ -13,7 +14,7 @@ const messageSchema = z.object({
 
 export function initSocket(httpServer: ReturnType<typeof createServer>) {
   const io = new Server(httpServer, {
-    cors: { origin: process.env.CLIENT_ORIGIN, credentials: true },
+    cors: { origin: env.CLIENT_ORIGIN, credentials: true },
   });
 
   io.adapter(createAdapter(pubClient, subClient));
@@ -37,7 +38,9 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
     });
 
     socket.on('message:send', async (payload) => {
+      console.log('Received message:send event with payload:', payload);
       const parsed = messageSchema.safeParse(payload);
+      console.log('Parsed message:', parsed);
       if (!parsed.success) return socket.emit('error', 'Invalid message');
 
       const message = await prisma.message.create({

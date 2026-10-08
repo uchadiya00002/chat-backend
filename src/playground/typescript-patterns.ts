@@ -4,30 +4,20 @@
 // Read each one, understand it, then delete this file.
 
 import { Request, Response } from 'express';
-
-// --- Pattern 1: Interface vs Type ---
-// Use `interface` for object shapes (component props, request bodies)
-// Use `type` for unions, primitives, and utility compositions
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-type UserRole = 'OWNER' | 'ADMIN' | 'MEMBER'; // union — must be `type`, not interface
-
-type PartialUser = Partial<User>; // utility type — also `type`
+import {
+  User,
+  UserRole,
+  PartialUser,
+  RegisterBody,
+  CreateChannelInput,
+  ApiResponse,
+} from '../types';
 
 // --- Pattern 2: Typing req.body ---
 // req.body is typed as `any` by default — don't leave it that way.
 // Define an interface for what you expect and assert it.
 
-interface RegisterBody {
-  email: string;
-  password: string;
-  name: string;
-}
+// `RegisterBody` is imported from `src/types`
 
 function registerHandler(req: Request, res: Response) {
   // Without the interface, req.body.email is `any` — no autocomplete,
@@ -38,11 +28,7 @@ function registerHandler(req: Request, res: Response) {
 }
 
 // --- Pattern 3: Optional vs required properties ---
-interface CreateChannelInput {
-  name: string;           // required — must always be provided
-  isPrivate?: boolean;    // optional — may or may not be present
-  description?: string;
-}
+// `CreateChannelInput` is imported from `src/types`
 
 function createChannel(input: CreateChannelInput) {
   // isPrivate could be undefined — TypeScript forces you to handle it
@@ -54,9 +40,7 @@ function createChannel(input: CreateChannelInput) {
 // This is the discriminated union pattern from your front-end notes —
 // same concept, same power, on the backend too
 
-type ApiResponse<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+// `ApiResponse` is imported from `src/types`
 
 function handleResponse<T>(response: ApiResponse<T>) {
   if (response.success) {
