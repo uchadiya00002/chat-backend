@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main, deployment ]
   pull_request:
-    branches: [ main, deployment ]
+    # run workflow for PRs targeting main only
+    branches: [ main ]
 
 jobs:
   build-and-migrate:
