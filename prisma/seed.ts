@@ -139,8 +139,14 @@ async function main() {
   ];
 
   for (const message of messages) {
-    await prisma.message.create({
-      data: message,
+    await prisma.message.upsert({
+      where: { id: message.id },
+      update: {
+        body: message.body,
+        channelId: message.channelId,
+        authorId: message.authorId,
+      },
+      create: message,
     });
   }
 
