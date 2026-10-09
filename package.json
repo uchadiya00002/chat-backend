@@ -7,6 +7,8 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "prisma generate && tsc",
     "start": "prisma migrate deploy && node dist/server.js",
+    "db:seed": "ts-node prisma/seed.ts",
+    "start:prod": "prisma migrate deploy && npm run db:seed && node dist/server.js",
     "services:up": "docker compose up -d --wait",
     "services:down": "docker compose stop",
     "services:status": "docker compose ps",
