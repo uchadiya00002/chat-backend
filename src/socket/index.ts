@@ -22,6 +22,33 @@ const reportSocketError = (
   socket.emit("error", { event, message: fallbackMessage });
 };
 
+const validateChannelAccess = async (userId: string, channelId: string) => {
+  const channel = await prisma.channel.findUnique({
+    where: { id: channelId },
+    select: { id: true, workspaceId: true },
+  });
+
+  if (!channel) {
+    throw new Error("Channel not found");
+  }
+
+  const membership = await prisma.workspaceMember.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId,
+        workspaceId: channel.workspaceId,
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    throw new Error("User is not a member of this workspace");
+  }
+
+  return channel;
+};
+
 export function initSocket(httpServer: ReturnType<typeof createServer>) {
   const io = new Server(httpServer, {
     cors: { origin: env.CLIENT_ORIGIN, credentials: true },
@@ -42,17 +69,21 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
           });
         }
 
+        await validateChannelAccess(userId, channelId);
+
         socket.join(channelId);
         await pubClient.sadd(`presence:${channelId}`, userId);
         const online = await pubClient.smembers(`presence:${channelId}`);
         io.to(channelId).emit("presence:update", online);
       } catch (error) {
-        reportSocketError(
-          socket,
-          "channel:join",
-          error,
-          "Could not join channel",
-        );
+        const message =
+          error instanceof Error && error.message === "Channel not found"
+            ? "Channel not found"
+            : error instanceof Error && error.message === "User is not a member of this workspace"
+              ? "You do not have access to this channel"
+              : "Could not join channel";
+
+        reportSocketError(socket, "channel:join", error, message);
       }
     });
 
@@ -89,6 +120,8 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
           });
         }
 
+        await validateChannelAccess(userId, parsed.data.channelId);
+
         const message = await prisma.message.create({
           data: {
             body: parsed.data.body,
@@ -100,12 +133,14 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
 
         io.to(parsed.data.channelId).emit("message:new", message);
       } catch (error) {
-        reportSocketError(
-          socket,
-          "message:send",
-          error,
-          "Could not send message",
-        );
+        const message =
+          error instanceof Error && error.message === "Channel not found"
+            ? "Channel not found"
+            : error instanceof Error && error.message === "User is not a member of this workspace"
+              ? "You do not have access to this channel"
+              : "Could not send message";
+
+        reportSocketError(socket, "message:send", error, message);
       }
     });
 
