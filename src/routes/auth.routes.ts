@@ -40,8 +40,23 @@ router.post('/register', async (req, res) => {
     select: { id: true, email: true, name: true },
   });
 
+  const workspaces = await prisma.workspaceMember.findMany({
+    where: { userId: user.id },
+    select: {
+      workspace: {
+        select: {
+          id: true,
+          name: true,
+          channels: { select: { id: true, name: true, isPrivate: true }, orderBy: { createdAt: 'asc' } },
+        },
+      },
+      role: true,
+    },
+  });
+
   res.status(201).json({
     user,
+    workspaces: workspaces.map((m) => ({ ...m.workspace, role: m.role })),
     accessToken: signAccessToken(user.id),
     refreshToken: signRefreshToken(user.id),
   });
@@ -61,8 +76,23 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ error: { message: 'Invalid email or password' } });
   }
 
+  const workspaces = await prisma.workspaceMember.findMany({
+    where: { userId: user.id },
+    select: {
+      workspace: {
+        select: {
+          id: true,
+          name: true,
+          channels: { select: { id: true, name: true, isPrivate: true }, orderBy: { createdAt: 'asc' } },
+        },
+      },
+      role: true,
+    },
+  });
+
   res.status(200).json({
     user: { id: user.id, email: user.email, name: user.name },
+    workspaces: workspaces.map((m) => ({ ...m.workspace, role: m.role })),
     accessToken: signAccessToken(user.id),
     refreshToken: signRefreshToken(user.id),
   });

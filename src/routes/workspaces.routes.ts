@@ -86,4 +86,32 @@ router.get('/:workspaceId/channels', async (req, res) => {
   res.status(200).json(channels);
 });
 
+router.get('/:workspaceId/channels/:channelId/messages', async (req, res) => {
+  const { workspaceId, channelId } = req.params;
+
+  const membership = await prisma.workspaceMember.findUnique({
+    where: { userId_workspaceId: { userId: req.user!.id, workspaceId } },
+  });
+  if (!membership) {
+    return res.status(403).json({ error: { message: 'Not a member of this workspace' } });
+  }
+
+  const channel = await prisma.channel.findUnique({
+    where: { id: channelId },
+    select: { workspaceId: true },
+  });
+  if (!channel || channel.workspaceId !== workspaceId) {
+    return res.status(404).json({ error: { message: 'Channel not found' } });
+  }
+
+  const messages = await prisma.message.findMany({
+    where: { channelId },
+    select: { id: true, body: true, createdAt: true, author: { select: { id: true, name: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  });
+
+  res.status(200).json(messages.reverse());
+});
+
 export default router;

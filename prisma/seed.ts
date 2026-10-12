@@ -7,30 +7,45 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // TEST USERS CREDENTIALS (for local development only)
+  // All users use password: "test@2024"
+  // Hash: $2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG
   const users = [
     {
       id: 'user_alice',
       email: 'alice@pulse.dev',
-      passwordHash: '$2a$10$L9iK8p2b4uYxv0mQJv6t9u6vQ9sJ7g5jv6Q4f6f3j0Y6w0t4E7rS.',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
       name: 'Alice Johnson',
     },
     {
       id: 'user_bob',
       email: 'bob@pulse.dev',
-      passwordHash: '$2a$10$L9iK8p2b4uYxv0mQJv6t9u6vQ9sJ7g5jv6Q4f6f3j0Y6w0t4E7rS.',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
       name: 'Bob Smith',
     },
     {
       id: 'user_charlie',
       email: 'charlie@pulse.dev',
-      passwordHash: '$2a$10$L9iK8p2b4uYxv0mQJv6t9u6vQ9sJ7g5jv6Q4f6f3j0Y6w0t4E7rS.',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
       name: 'Charlie Brown',
     },
     {
       id: 'user_diana',
       email: 'diana@pulse.dev',
-      passwordHash: '$2a$10$L9iK8p2b4uYxv0mQJv6t9u6vQ9sJ7g5jv6Q4f6f3j0Y6w0t4E7rS.',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
       name: 'Diana Ross',
+    },
+    {
+      id: 'user_emma',
+      email: 'emma@pulse.dev',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
+      name: 'Emma Wilson',
+    },
+    {
+      id: 'user_frank',
+      email: 'frank@pulse.dev',
+      passwordHash: '$2b$10$9Md6uSuvH4CtFIBCuSseZ.zaH4wUZYyO8QvxBg04akyc7WU2bdRWG',
+      name: 'Frank Miller',
     },
   ];
 
@@ -59,9 +74,11 @@ async function main() {
     { id: 'wm_alice_product', userId: 'user_alice', workspaceId: 'ws_product', role: WorkspaceRole.OWNER },
     { id: 'wm_bob_product', userId: 'user_bob', workspaceId: 'ws_product', role: WorkspaceRole.ADMIN },
     { id: 'wm_charlie_product', userId: 'user_charlie', workspaceId: 'ws_product', role: WorkspaceRole.MEMBER },
+    { id: 'wm_emma_product', userId: 'user_emma', workspaceId: 'ws_product', role: WorkspaceRole.MEMBER },
     { id: 'wm_alice_engineering', userId: 'user_alice', workspaceId: 'ws_engineering', role: WorkspaceRole.OWNER },
     { id: 'wm_diana_engineering', userId: 'user_diana', workspaceId: 'ws_engineering', role: WorkspaceRole.ADMIN },
     { id: 'wm_bob_engineering', userId: 'user_bob', workspaceId: 'ws_engineering', role: WorkspaceRole.MEMBER },
+    { id: 'wm_frank_engineering', userId: 'user_frank', workspaceId: 'ws_engineering', role: WorkspaceRole.MEMBER },
   ];
 
   for (const membership of memberships) {
