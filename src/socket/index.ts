@@ -8,7 +8,7 @@ import { env } from "../config/env";
 import { z } from "zod";
 
 const messageSchema = z.object({
-  channelId: z.string().uuid(),
+  channelId: z.string().min(1, "Channel ID is required"),
   body: z.string().min(1).max(4000),
 });
 
@@ -73,6 +73,16 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
 
         socket.join(channelId);
         await pubClient.sadd(`presence:${channelId}`, userId);
+        
+        // Fetch and send last 20 messages to the user
+        const messages = await prisma.message.findMany({
+          where: { channelId },
+          select: { id: true, body: true, createdAt: true, author: { select: { id: true, name: true } } },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        });
+        socket.emit("channel:messages:history", messages.reverse());
+        
         const online = await pubClient.smembers(`presence:${channelId}`);
         io.to(channelId).emit("presence:update", online);
       } catch (error) {
@@ -113,10 +123,13 @@ export function initSocket(httpServer: ReturnType<typeof createServer>) {
     socket.on("message:send", async (payload) => {
       try {
         const parsed = messageSchema.safeParse(payload);
+        
         if (!parsed.success) {
+          console.error("Message validation failed:", parsed.error.flatten().fieldErrors);
           return socket.emit("error", {
             event: "message:send",
             message: "Invalid message payload",
+            details: parsed.error.flatten().fieldErrors,
           });
         }
 
